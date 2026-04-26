@@ -79,7 +79,7 @@ def main():
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ CAPA 5 / INTERFAZ DE SUSCRIPTOR (B2C) ]</p>", unsafe_allow_html=True)
-    st.markdown("""<div class="b2c-box"><h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3><p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Incluye simulador matemático interactivo para próximos encuentros.</p></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="b2c-box"><h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3><p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Incluye simulador estocástico interactivo para próximos encuentros.</p></div>""", unsafe_allow_html=True)
     col_btn, _ = st.columns([0.25, 0.75])
     with col_btn:
         st.markdown("""<style>div.stButton > button[kind="secondary"] { border-color: #58a6ff !important; color: #58a6ff !important; } div.stButton > button[kind="secondary"]:hover { background-color: rgba(88, 166, 255, 0.1) !important; box-shadow: 0 0 10px #58a6ff; }</style>""", unsafe_allow_html=True)
@@ -88,7 +88,9 @@ def main():
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYS.LOGS / ACTIVITY FEED ]</p>", unsafe_allow_html=True)
     current_t = datetime.now().strftime('%H:%M:%S')
-    logs_html = f"<div class='terminal-feed'><div>>[{current_t}] [INFO] Predictive Engine v10.1 loaded.</div><div style='color:#58a6ff;'>> [{current_t}] [SaaS] Stripe API sync completed. MRR updated.</div><div style='color:#EBCB8B;'>>[{current_t}] [WARN] Anomalous odds drop detected.</div><div>> [{current_t}][SYS] Awaiting Operator Directive...</div></div>"
+    
+    logs_html = f"<div class='terminal-feed'><div>>[{current_t}] [INFO] Predictive Engine v10.1 loaded.</div><div style='color:#58a6ff;'>> [{current_t}][SaaS] Stripe API sync completed. MRR updated.</div><div style='color:#EBCB8B;'>> [{current_t}] [WARN] Anomalous odds drop detected.</div><div>> [{current_t}][SYS] Awaiting Operator Directive...</div></div>"
+    
     st.markdown(logs_html, unsafe_allow_html=True)
 
 if __name__ == "__main__":
