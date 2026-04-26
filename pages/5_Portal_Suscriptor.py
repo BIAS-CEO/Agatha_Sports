@@ -131,7 +131,6 @@ st.markdown("""
 # DATOS SINTÉTICOS PARA DEMOSTRACIÓN A INVERSORES (PITCH MODE)
 # ==============================================================================
 def get_investor_demo_picks():
-    """Genera recomendaciones estructuradas según la directiva de valor diferencial."""
     return[
         {
             "id": "1/3",
@@ -168,10 +167,8 @@ def get_investor_demo_picks():
     ]
 
 def draw_track_record_chart():
-    """Renderiza el gráfico de 'Transparencia Radical' exigido por el modelo de negocio."""
     np.random.seed(42)
     fechas = pd.date_range(start=datetime.now() - timedelta(days=90), periods=90)
-    # Simulación de crecimiento estable y conservador (Yield ~4-5%)
     crecimiento = np.random.normal(loc=0.15, scale=0.8, size=90)
     capital = 10000 + np.cumsum(crecimiento * 100)
     
@@ -213,14 +210,10 @@ def main():
         if st.button("[ VOLVER AL C2 / ADMIN ]"):
             st.switch_page("app.py")
 
-    # --- DASHBOARD: TRANSPARENCIA RADICAL Y GESTIÓN DE BANKROLL ---
     st.markdown("""
     <div class="trust-banner">
         <strong>✓ TRANSPARENCIA RADICAL:</strong> Todas nuestras operaciones están auditadas por terceros independientes (Blogabet/Pyckio). Nuestro modelo no percibe ingresos por afiliación de casas de apuestas. Su rentabilidad es nuestro único modelo de negocio.
     </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
     <div class="user-stats-container">
         <div class="user-stat">
             <div class="stat-value">11,450 EUR</div>
@@ -241,14 +234,12 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # Gráfico de Histórico
     with st.expander("VER HISTÓRICO DE RENDIMIENTO (ÚLTIMOS 90 DÍAS)", expanded=False):
         st.plotly_chart(draw_track_record_chart(), use_container_width=True, config={'displayModeBar': False})
 
     st.markdown("<h2 style='color:#ffffff; margin-bottom:5px; margin-top:20px;'>Recomendaciones Algorítmicas de Hoy</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color:#8b949e; margin-bottom:30px;'><strong>Filtro Conservador:</strong> Volumen selectivo. Exigencia de Edge > 3.0%. Gestión de riesgo integrada (Kelly Fraccional).</p>", unsafe_allow_html=True)
 
-    # --- RENDERIZADO DE PICKS (PITCH MODE) ---
     picks = get_investor_demo_picks()
     
     for pick in picks:
@@ -271,22 +262,18 @@ def main():
         with m4: st.markdown(f"<div class='metric-item'><div class='metric-value' style='color:#f0883e;'>{pick['kelly_stake']}</div><div class='metric-label'>Bankroll (Kelly)</div></div>", unsafe_allow_html=True)
         
         st.write("")
-        
-        # --- EXPLICABILIDAD PONDERADA ---
         st.markdown("<div style='font-weight: 700; margin-bottom: 10px; color: #ffffff;'>Explicabilidad del Modelo (Factores Ponderados):</div>", unsafe_allow_html=True)
         
+        # Inyección HTML sin tabulaciones ni saltos de línea para evitar colisión con Markdown
         exp_html = "<div class='exp-container'>"
         for peso in pick['explicabilidad_pesos']:
-            # Renderizado de barras de peso
-            exp_html += f"""
-            <div class='weight-row'>
-                <span>{peso['factor']}</span>
-                <span style='color:#58a6ff; font-weight:bold;'>{peso['peso']}%</span>
-            </div>
-            <div class='weight-bar-bg'><div class='weight-bar-fill' style='width: {peso['peso']}%;'></div></div>
-            <div class='exp-text'>- {peso['desc']}</div>
-            <div style='margin-bottom:15px;'></div>
-            """
+            exp_html += "<div class='weight-row'>"
+            exp_html += f"<span>{peso['factor']}</span>"
+            exp_html += f"<span style='color:#58a6ff; font-weight:bold;'>{peso['peso']}%</span>"
+            exp_html += "</div>"
+            exp_html += f"<div class='weight-bar-bg'><div class='weight-bar-fill' style='width: {peso['peso']}%;'></div></div>"
+            exp_html += f"<div class='exp-text'>- {peso['desc']}</div>"
+            exp_html += "<div style='margin-bottom:15px;'></div>"
         exp_html += "</div></div>"
         
         st.markdown(exp_html, unsafe_allow_html=True)
