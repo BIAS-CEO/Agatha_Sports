@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import public_behavior_engine as pbe
 
-# Importación del núcleo analítico
+# Importación de núcleos analíticos
 import sports_core as sc
+from public_behavior_engine import PublicBehaviorModel
 
 # ==============================================================================
 # CONFIGURACIÓN DE PÁGINA Y CSS TÁCTICO
@@ -33,8 +33,6 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     div.stButton > button:hover { background-color: rgba(224, 64, 251, 0.3) !important; box-shadow: 0 0 10px #E040FB; }
-    
-    /* Modificación de tablas dataframe */
     [data-testid="stDataFrame"] { background-color: #0D1117; }
 </style>
 """, unsafe_allow_html=True)
@@ -42,8 +40,8 @@ st.markdown("""
 # ==============================================================================
 # CABECERA DE SISTEMA
 # ==============================================================================
-st.markdown("<h1>[2] RADAR DE MERCADO (+EV)</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#8B949E;'>// RASTREO MULTI-BOOKMAKER, CÁLCULO DE PROBABILIDAD IMPLÍCITA Y DETECCIÓN DE ANOMALÍAS</p>", unsafe_allow_html=True)
+st.markdown("<h1>[2] RADAR DE MERCADO (+EV) Y SESGO POBLACIONAL</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#8B949E;'>// RASTREO MULTI-BOOKMAKER, ANOMALÍAS ESTOCÁSTICAS Y DESVANECIMIENTO DE MASA (FADE THE PUBLIC)</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # ==============================================================================
@@ -87,60 +85,66 @@ with c3:
 st.markdown("---")
 
 # ==============================================================================
-# MOTOR DE DETECCIÓN DE ANOMALÍAS MATEMÁTICAS
+# MOTOR DE DETECCIÓN DE ANOMALÍAS Y SESGO DE MASA
 # ==============================================================================
 if 'market_data' in st.session_state and not st.session_state['market_data'].empty:
     df = st.session_state['market_data']
     
-    # Cálculos vectorizados para eficiencia de memoria
-    # 1. Probabilidad Implícita = (1 / Cuota) * 100
     df['probabilidad_implicita_%'] = (1 / df['price']) * 100
     
-    # 2. Agrupación por Partido, Mercado y Selección para encontrar ineficiencias
     df_agrupado = df.groupby(['match', 'market', 'selection']).agg(
         cuota_media=('price', 'mean'),
         cuota_maxima=('price', 'max'),
         bookmakers_activos=('bookmaker', 'count')
     ).reset_index()
     
-    # 3. Cálculo de Varianza (Edge inicial crudo)
-    # Si la cuota máxima es significativamente más alta que la media, indica un desajuste.
     df_agrupado['desviacion_pct'] = ((df_agrupado['cuota_maxima'] - df_agrupado['cuota_media']) / df_agrupado['cuota_media']) * 100
     
-    # Filtrar solo anomalías positivas (Cuotas máximas por encima de la media del mercado)
     anomalias = df_agrupado[df_agrupado['desviacion_pct'] > 3.0].sort_values(by='desviacion_pct', ascending=False)
     
-    col_a, col_b = st.columns([1, 1])
-    
-    with col_a:
-        st.markdown("### PANEL DE DETECCIÓN DE ANOMALÍAS (+EV POTENCIAL)")
-        if not anomalias.empty:
+    if not anomalias.empty:
+        # INYECCIÓN DEL MOTOR DE COMPORTAMIENTO PÚBLICO
+        with st.spinner("Compilando red neuronal Random Forest para detección de sesgo poblacional..."):
+            engine = PublicBehaviorModel()
+            training_data = engine.generate_training_data(samples=10000)
+            engine.train_model(training_data)
+            
+            # Generación de vectores sintéticos de popularidad para la evaluación (MVP)
+            np.random.seed(len(anomalias))
+            anomalias_eval = anomalias.copy()
+            anomalias_eval['popularity_index'] = np.random.uniform(40, 99, len(anomalias_eval))
+            anomalias_eval['recent_win_streak'] = np.random.randint(0, 6, len(anomalias_eval))
+            anomalias_eval['is_popular_market'] = np.where(anomalias_eval['market'].str.contains('totals', case=False), 1, 0)
+            anomalias_eval['odds_drop_pct'] = anomalias_eval['desviacion_pct']
+            
+            # Inferencia final
+            anomalias_procesadas = engine.predict_public_bias(anomalias_eval)
+        
+        col_a, col_b = st.columns([1.5, 1])
+        
+        with col_a:
+            st.markdown("### PANEL DE DETECCIÓN: ANOMALÍAS Y DIRECTIVA DE FADEO")
             st.dataframe(
-                anomalias[['match', 'selection', 'cuota_media', 'cuota_maxima', 'desviacion_pct']]
+                anomalias_procesadas[['match', 'selection', 'cuota_maxima', 'prob_public_money_%', 'directiva_tactica']]
                 .style.format({
-                    'cuota_media': "{:.2f}",
                     'cuota_maxima': "{:.2f}",
-                    'desviacion_pct': "{:.2f}%"
-                }).background_gradient(subset=['desviacion_pct'], cmap='Purples'),
+                    'prob_public_money_%': "{:.2f}%"
+                }).background_gradient(subset=['prob_public_money_%'], cmap='Reds'),
                 use_container_width=True,
                 height=400
             )
-        else:
-            st.info("Mercado eficiente. No se detectan anomalías de desviación > 3.0%.")
-            
-    with col_b:
-        st.markdown("### DISPERSIÓN DE LÍNEAS (SHARP VS PUBLIC)")
-        # Gráfico Plotly para visualizar las anomalías
-        if not anomalias.empty:
+                
+        with col_b:
+            st.markdown("### DISPERSIÓN: CUOTAS VS SESGO DE MASA")
             fig = px.scatter(
-                anomalias,
-                x='cuota_media',
-                y='cuota_maxima',
+                anomalias_procesadas,
+                x='cuota_maxima',
+                y='prob_public_money_%',
                 color='desviacion_pct',
                 hover_name='match',
                 hover_data=['selection'],
                 color_continuous_scale='Purples',
-                title="Vector de Discrepancia: Media vs Máxima"
+                title="Correlación de Inflación Pública"
             )
             fig.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
@@ -149,21 +153,19 @@ if 'market_data' in st.session_state and not st.session_state['market_data'].emp
                 xaxis=dict(showgrid=True, gridcolor='#30363D'),
                 yaxis=dict(showgrid=True, gridcolor='#30363D')
             )
-            # Línea de mercado perfecto (Media = Máxima)
-            max_val = anomalias['cuota_maxima'].max()
-            fig.add_shape(type="line", x0=0, y0=0, x1=max_val, y1=max_val, line=dict(color="#BF616A", dash="dash"))
-            
+            fig.add_hline(y=80, line_dash="dash", line_color="#BF616A", annotation_text="Límite Crítico Sesgo")
             st.plotly_chart(fig, use_container_width=True)
-            
             del fig
-        else:
-            st.write("Datos insuficientes para renderizar la dispersión espacial.")
+            
+        with st.expander("VER MATRIZ CRUDA (RAW DATA)"):
+            st.dataframe(df, use_container_width=True)
+            
+        del anomalias_procesadas
+        del training_data
+        
+    else:
+        st.info("Mercado eficiente. No se detectan anomalías de desviación > 3.0%.")
 
-    # Visor Raw de datos interceptados
-    with st.expander("VER MATRIZ DE CUOTAS CRUDA (RAW DATA)"):
-        st.dataframe(df, use_container_width=True)
-
-    # Liberación explícita de DataFrames para prevención OOM
     del df
     del df_agrupado
     del anomalias
