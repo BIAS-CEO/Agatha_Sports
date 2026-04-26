@@ -31,6 +31,87 @@ def get_secret(key: str) -> str:
         st.stop()
 
 # ==============================================================================
+# INYECCIÓN DE INTERFAZ TÁCTICA (GLOBAL THEME)
+# ==============================================================================
+def set_agatha_theme():
+    """Inyecta el CSS global. Debe llamarse tras st.set_page_config."""
+    st.markdown("""
+    <style>
+        /* 1. FONDO Y FUENTES GLOBALES */
+        .stApp {
+            background-color: #050505;
+            background-image: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background-size: 100% 2px, 3px 100%;
+            font-family: 'Share Tech Mono', monospace;
+            color: #ECEFF4;
+        }
+        [data-testid="stHeader"] { display: none !important; }
+        h1, h2, h3, h4, h5 { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; }
+
+        /* 2. CORRECCIÓN DE CONTRASTE PARA ETIQUETAS Y SELECTORES */
+        label,[data-testid="stWidgetLabel"] p, .st-emotion-cache-1y0t11s {
+            color: #88C0D0 !important;
+            font-family: 'Rajdhani', sans-serif !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 1.5px !important;
+            text-transform: uppercase;
+        }
+
+        /* 3. INPUTS Y SELECTORES OSCUROS */
+        input[type="text"], input[type="number"], div[data-baseweb="select"] > div {
+            background-color: #0D1117 !important;
+            color: #ECEFF4 !important;
+            border: 1px solid #4C566A !important;
+            font-family: 'Share Tech Mono', monospace !important;
+            border-radius: 0px !important;
+        }
+        div[data-baseweb="popover"] {
+            background-color: #0D1117 !important;
+            border: 1px solid #4C566A !important;
+        }
+        [data-testid="stDataFrame"] { background-color: #0D1117; }
+
+        /* 4. BOTONES TÁCTICOS GLOBALES */
+        div.stButton > button {
+            background-color: transparent !important;
+            border: 1px solid #4C566A !important;
+            color: #ECEFF4 !important;
+            font-family: 'Share Tech Mono', monospace !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: 100%;
+            border-radius: 0px !important;
+        }
+        div.stButton > button:hover {
+            border-color: #88C0D0 !important;
+            background-color: rgba(136, 192, 208, 0.1) !important;
+            color: #88C0D0 !important;
+            box-shadow: 0 0 10px rgba(136, 192, 208, 0.2);
+        }
+
+        /* 5. CAJAS DE MÉTRICAS GLOBALES */
+        .metric-box {
+            background-color: #161B22;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-left: 4px solid #88C0D0;
+        }
+        .warning-box { border-left-color: #EBCB8B; }
+        .critical-box { border-left-color: #BF616A; }
+        .success-box { border-left-color: #A3BE8C; }
+        .injury-box { border-left-color: #BF616A; background-color: rgba(191, 97, 106, 0.05); }
+        .lineup-box { border-left-color: #A3BE8C; background-color: rgba(163, 190, 140, 0.05); }
+        .metric-value-pos { color: #A3BE8C; font-size: 1.5rem; font-weight: bold; }
+        .metric-value-neg { color: #BF616A; font-size: 1.5rem; font-weight: bold; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# ==============================================================================
 # CAPA 2: PIPELINE DE INGESTA (API-FOOTBALL)
 # ==============================================================================
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -47,7 +128,7 @@ def fetch_daily_fixtures(date_str: str) -> pd.DataFrame:
     try:
         response = requests.get(url, headers=headers, params=params, timeout=15)
         response.raise_for_status()
-        data = response.json().get("response", [])
+        data = response.json().get("response",[])
         
         if not data:
             return pd.DataFrame()
@@ -66,8 +147,7 @@ def fetch_daily_fixtures(date_str: str) -> pd.DataFrame:
                 "date": item["fixture"]["date"]
             })
             
-        df = pd.DataFrame(df_list)
-        return df
+        return pd.DataFrame(df_list)
     except Exception as e:
         st.error(f"FALLO DE CONEXIÓN (API-Football): {str(e)}")
         return pd.DataFrame()
@@ -81,11 +161,7 @@ def fetch_team_statistics(team_id: int, league_id: int, season: int) -> dict:
         "x-apisports-key": api_key,
         "x-rapidapi-host": "v3.football.api-sports.io"
     }
-    params = {
-        "team": team_id,
-        "league": league_id,
-        "season": season
-    }
+    params = {"team": team_id, "league": league_id, "season": season}
     
     try:
         response = requests.get(url, headers=headers, params=params, timeout=15)
@@ -117,7 +193,7 @@ def fetch_market_odds(sport_key: str = "soccer_spain_la_liga") -> pd.DataFrame:
         if not data:
             return pd.DataFrame()
             
-        odds_list = []
+        odds_list =[]
         for match in data:
             match_name = f"{match['home_team']} vs {match['away_team']}"
             bookmakers = match.get("bookmakers",[])
@@ -125,7 +201,6 @@ def fetch_market_odds(sport_key: str = "soccer_spain_la_liga") -> pd.DataFrame:
             if not bookmakers:
                 continue
                 
-            # Extraer la mejor línea disponible (Pinnacle o primer bookmaker)
             target_bookmaker = next((b for b in bookmakers if b["key"] == "pinnacle"), bookmakers[0])
             
             for market in target_bookmaker.get("markets", []):
@@ -187,10 +262,7 @@ def _execute_openai_call(prompt: str, system_message: str, temperature: float) -
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def predict_match_value(dossier_partido: dict, cuotas_mercado: dict) -> dict:
-    """
-    Protocolo de análisis 'Billy Walters'.
-    Determina probabilidad real, compara con cuotas y calcula el edge (+EV).
-    """
+    """Protocolo de análisis 'Billy Walters'."""
     system_prompt = """
     Soy AGATHA. Actúo como Analista Profesional de Apuestas Deportivas y Modelador Matemático.
     Detecto ineficiencias en el mercado (Value Bets / +EV) procesando estadísticas tácticas. No emito opiniones, calculo probabilidades.
@@ -220,27 +292,13 @@ def predict_match_value(dossier_partido: dict, cuotas_mercado: dict) -> dict:
         }
     }
     """
-    
-    prompt = f"""
-    **DOSSIER DE INTELIGENCIA DEL PARTIDO:**
-    {json.dumps(dossier_partido, indent=2, ensure_ascii=False)}
-
-    **CUOTAS ACTUALES DEL MERCADO:**
-    {json.dumps(cuotas_mercado, indent=2, ensure_ascii=False)}
-
-    **ACCIÓN REQUERIDA:**
-    Ejecuta el cálculo predictivo y genera el JSON de inteligencia.
-    """
-    
+    prompt = f"**DOSSIER DE INTELIGENCIA:**\n{json.dumps(dossier_partido, indent=2, ensure_ascii=False)}\n\n**CUOTAS MERCADO:**\n{json.dumps(cuotas_mercado, indent=2, ensure_ascii=False)}"
     raw_response = _execute_openai_call(prompt, system_prompt, 0.2)
     return extract_json_from_response(raw_response)
 
-# ==============================================================================
-# UTILIDAD DE ENSAMBLAJE
-# ==============================================================================
 def compile_match_dossier(match_data: dict, home_stats: dict, away_stats: dict) -> dict:
     """Fusiona telemetría cruda en un dossier estructurado para el LLM."""
-    dossier = {
+    return {
         "contexto_evento": {
             "liga": match_data.get("league_name"),
             "fecha": match_data.get("date"),
@@ -250,4 +308,3 @@ def compile_match_dossier(match_data: dict, home_stats: dict, away_stats: dict) 
         "rendimiento_local": home_stats,
         "rendimiento_visitante": away_stats
     }
-    return dossier
