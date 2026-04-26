@@ -17,11 +17,17 @@ def release_memory():
 # GESTIÓN DE CREDENCIALES
 # ==============================================================================
 def get_secret(key: str) -> str:
-    """Extracción segura de secretos compatible con Streamlit."""
+    """Extracción segura de secretos compatible con la raíz de Streamlit Secrets."""
     try:
-        return st.secrets["api_keys"][key]
-    except KeyError:
-        st.error(f"BRECHA DE CONFIGURACIÓN: Clave {key} no encontrada en secrets.toml.")
+        if key in st.secrets:
+            return st.secrets[key]
+        elif "api_keys" in st.secrets and key in st.secrets["api_keys"]:
+            return st.secrets["api_keys"][key]
+        else:
+            st.error(f"BRECHA DE CONFIGURACIÓN: Clave {key} no detectada en Streamlit Secrets.")
+            st.stop()
+    except Exception as e:
+        st.error(f"FALLO DE LECTURA DE SECRETOS: {str(e)}")
         st.stop()
 
 # ==============================================================================
@@ -41,7 +47,7 @@ def fetch_daily_fixtures(date_str: str) -> pd.DataFrame:
     try:
         response = requests.get(url, headers=headers, params=params, timeout=15)
         response.raise_for_status()
-        data = response.json().get("response",[])
+        data = response.json().get("response", [])
         
         if not data:
             return pd.DataFrame()
@@ -111,7 +117,7 @@ def fetch_market_odds(sport_key: str = "soccer_spain_la_liga") -> pd.DataFrame:
         if not data:
             return pd.DataFrame()
             
-        odds_list =[]
+        odds_list = []
         for match in data:
             match_name = f"{match['home_team']} vs {match['away_team']}"
             bookmakers = match.get("bookmakers",[])
@@ -122,7 +128,7 @@ def fetch_market_odds(sport_key: str = "soccer_spain_la_liga") -> pd.DataFrame:
             # Extraer la mejor línea disponible (Pinnacle o primer bookmaker)
             target_bookmaker = next((b for b in bookmakers if b["key"] == "pinnacle"), bookmakers[0])
             
-            for market in target_bookmaker.get("markets",[]):
+            for market in target_bookmaker.get("markets", []):
                 market_name = market["key"]
                 for outcome in market.get("outcomes",[]):
                     odds_list.append({
