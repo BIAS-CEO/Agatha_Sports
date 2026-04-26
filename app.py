@@ -1,263 +1,113 @@
 import streamlit as st
 import time
 from datetime import datetime
+import plotly.graph_objects as go
+import sports_core as sc
 
 # ==============================================================================
 # CONFIGURACIÓN BASE DEL SISTEMA
 # ==============================================================================
-st.set_page_config(
-    page_title="AGATHA OS | Sports Intelligence",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="AGATHA OS | Command Center", layout="wide", initial_sidebar_state="collapsed")
+sc.set_agatha_theme()
 
-# ==============================================================================
-# INYECCIÓN CSS TÁCTICO (HUD V4 DEPURADO)
-# ==============================================================================
 st.markdown("""
 <style>
-    /* FONDO GENERAL SCANLINE */
-    .stApp {
-        background-color: #050505;
-        background-image: 
-            linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-            linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-        background-size: 100% 2px, 3px 100%;
-        font-family: 'Share Tech Mono', monospace;
-    }
-
-    /* OCULTAR ELEMENTOS NATIVOS */
-    [data-testid="stHeader"] { display: none !important; }
-
-    /* HEADER SYSTEM */
-    .header-container {
-        border-bottom: 2px solid #30363D;
-        padding-top: 2rem;
-        padding-bottom: 20px;
-        margin-bottom: 40px;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-    }
-    
-    .main-title {
-        font-family: 'Rajdhani', sans-serif;
-        font-size: 5rem;
-        font-weight: 900;
-        color: #ECEFF4;
-        text-shadow: 0 0 20px rgba(236, 239, 244, 0.3);
-        line-height: 0.8;
-        letter-spacing: -2px;
-        margin: 0;
-    }
-    
-    .sub-title {
-        font-family: 'Share Tech Mono', monospace;
-        color: #88C0D0;
-        font-size: 1.2rem;
-        letter-spacing: 4px;
-        margin-top: 5px;
-    }
-
-    /* TARJETAS HUD */
-    .hud-card {
-        background: linear-gradient(135deg, rgba(22, 27, 34, 0.95) 0%, rgba(13, 17, 23, 0.98) 100%);
-        border: 1px solid #30363D;
-        position: relative;
-        padding: 25px;
-        height: 100%;
-        min-height: 220px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow: hidden;
-    }
-    
-    .hud-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        border-width: 0 30px 30px 0;
-        border-style: solid;
-        border-color: #0d1117 rgba(0,0,0,0) rgba(0,0,0,0) #0d1117; 
-        display: block;
-        width: 0;
-    }
-
-    /* BORDES DE COLOR */
-    .border-cyan { border-left: 4px solid #88C0D0; }
-    .border-purple { border-left: 4px solid #E040FB; }
-    .border-yellow { border-left: 4px solid #EBCB8B; }
-    .border-red { border-left: 4px solid #BF616A; }
-
-    /* HOVER EFFECTS */
-    .hud-card:hover {
-        transform: translateY(-5px);
-        background: rgba(30, 35, 45, 1);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .hud-card:hover.border-cyan { box-shadow: 0 0 20px rgba(136, 192, 208, 0.2); border-color: #88C0D0; }
-    .hud-card:hover.border-purple { box-shadow: 0 0 20px rgba(224, 64, 251, 0.2); border-color: #E040FB; }
-    .hud-card:hover.border-yellow { box-shadow: 0 0 20px rgba(235, 203, 139, 0.2); border-color: #EBCB8B; }
-    .hud-card:hover.border-red { box-shadow: 0 0 20px rgba(191, 97, 106, 0.2); border-color: #BF616A; }
-
-    .card-icon { 
-        font-family: 'Share Tech Mono', monospace; 
-        font-size: 1.5rem; 
-        font-weight: bold;
-        margin-bottom: 15px; 
-        opacity: 0.8; 
-    }
-    
-    .card-header { 
-        font-family: 'Rajdhani', sans-serif; 
-        font-size: 1.8rem; 
-        font-weight: 800; 
-        color: #fff; 
-        text-transform: uppercase;
-        margin-bottom: 10px;
-    }
-    
-    .card-body {
-        font-family: 'Share Tech Mono', monospace;
-        color: #8B949E;
-        font-size: 0.9rem;
-        line-height: 1.6;
-        border-top: 1px solid #30363D;
-        padding-top: 15px;
-        margin-top: 10px;
-    }
-
-    /* BOTONES */
-    div.stButton > button {
-        background-color: transparent !important;
-        border: 1px solid #4C566A !important;
-        color: #88C0D0 !important;
-        font-family: 'Share Tech Mono', monospace !important;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        transition: all 0.3s ease;
-        width: 100%;
-        border-radius: 0px !important;
-    }
-    div.stButton > button:hover {
-        border-color: #88C0D0 !important;
-        background-color: rgba(136, 192, 208, 0.1) !important;
-        box-shadow: 0 0 10px rgba(136, 192, 208, 0.2);
-    }
-
-    /* TERMINAL LOGS */
-    .kernel-log {
-        font-family: 'Share Tech Mono', monospace;
-        color: #4C566A;
-        font-size: 0.8rem;
-        margin-top: 50px;
-        border-top: 1px dashed #30363D;
-        padding-top: 10px;
-    }
+    .header-container { border-bottom: 1px solid #30363D; padding-top: 1rem; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .main-title { font-size: 4rem; font-weight: 900; text-shadow: 0 0 15px rgba(236, 239, 244, 0.2); line-height: 0.8; letter-spacing: -2px; margin: 0; }
+    .sub-title { color: #88C0D0; font-size: 1rem; letter-spacing: 3px; margin-top: 10px; }
+    .kpi-container { background: #0D1117; border: 1px solid #30363D; padding: 15px; text-align: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+    .kpi-value { font-family: 'Rajdhani', sans-serif; font-size: 2.5rem; font-weight: bold; color: #ECEFF4; }
+    .kpi-label { font-size: 0.8rem; color: #8B949E; text-transform: uppercase; letter-spacing: 1px; }
+    .hud-card { background: linear-gradient(135deg, rgba(22, 27, 34, 0.95) 0%, rgba(13, 17, 23, 0.98) 100%); border: 1px solid #30363D; padding: 20px; height: 100%; min-height: 240px; transition: all 0.3s ease; }
+    .hud-card:hover { transform: translateY(-2px); background: rgba(30, 35, 45, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+    .card-header { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+    .card-body { color: #8B949E; font-size: 0.85rem; line-height: 1.5; border-top: 1px solid #30363D; padding-top: 10px; margin-top: 10px; margin-bottom: 20px; }
+    .terminal-feed { background-color: #0D1117; border: 1px solid #30363D; padding: 15px; height: 200px; overflow-y: hidden; color: #A3BE8C; font-size: 0.8rem; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    .live-indicator { color: #BF616A; animation: pulse 2s infinite; font-weight: bold; }
+    .border-cyan { border-top: 3px solid #88C0D0; }
+    .border-purple { border-top: 3px solid #E040FB; }
+    .border-yellow { border-top: 3px solid #EBCB8B; }
+    .border-red { border-top: 3px solid #BF616A; }
 </style>
 """, unsafe_allow_html=True)
 
-# ==============================================================================
-# RENDERIZADO DE INTERFAZ
-# ==============================================================================
+def create_gauge_chart(value, title, color):
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = value,
+        title = {'text': title, 'font': {'color': '#8B949E', 'size': 12}},
+        number = {'font': {'color': '#ECEFF4', 'size': 20}},
+        gauge = {'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "#30363D"}, 'bar': {'color': color}, 'bgcolor': "rgba(0,0,0,0)", 'borderwidth': 1, 'bordercolor': "#30363D"}
+    ))
+    fig.update_layout(height=150, margin=dict(l=10, r=10, t=30, b=10), paper_bgcolor="rgba(0,0,0,0)", font={'family': "Share Tech Mono"})
+    return fig
+
 def main():
-    # --- HEADER ---
     st.markdown("""
     <div class="header-container">
         <div>
-            <h1 class="main-title">AGATHA OS <span style="font-size:2rem; color:#4C566A; vertical-align:middle;">v10.1</span></h1>
-            <div class="sub-title">/// BEHAVIORAL SPORTS INTELLIGENCE</div>
+            <h1 class="main-title">AGATHA OS <span style="font-size:1.5rem; color:#4C566A; vertical-align:middle;">ENTERPRISE EDITION</span></h1>
+            <div class="sub-title">/// BEHAVIORAL SPORTS INTELLIGENCE PIPELINE</div>
         </div>
-        <div style="text-align:right; font-family:'Share Tech Mono'; color:#5E81AC;">
+        <div style="text-align:right; font-size: 0.9rem; color:#5E81AC;">
             <div>SYS_TIME: <span style="color:#ECEFF4;">{}</span></div>
-            <div>LOC: <span style="color:#ECEFF4;">MAIN-NODE</span></div>
-            <div style="color:#A3BE8C;">[+] ONLINE</div>
+            <div>STATUS: <span class="live-indicator">[REC] SECURE UPLINK</span></div>
+            <div style="color:#A3BE8C;">DEFCON 5 / NORMAL OP</div>
         </div>
     </div>
     """.format(datetime.now().strftime('%H:%M:%S ZULU')), unsafe_allow_html=True)
 
-    # --- GRID OPERATIVO ---
-    c1, c2 = st.columns(2)
+    st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYSTEM TELEMETRY / GLOBAL OVERVIEW ]</p>", unsafe_allow_html=True)
+    
+    k1, k2, k3, k4 = st.columns(4)
+    with k1: st.markdown("""<div class="kpi-container"><div class="kpi-value">2,104</div><div class="kpi-label">NODOS ANALIZADOS (24H)</div></div>""", unsafe_allow_html=True)
+    with k2: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#EBCB8B;">14</div><div class="kpi-label">VALUE BETS DETECTADAS</div></div>""", unsafe_allow_html=True)
+    with k3: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#A3BE8C;">+4.2%</div><div class="kpi-label">YIELD ACUMULADO (30D)</div></div>""", unsafe_allow_html=True)
+    with k4: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#E040FB;">89.4%</div><div class="kpi-label">CALIBRACIÓN SISTEMA</div></div>""", unsafe_allow_html=True)
 
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown("""
-        <div class="hud-card border-cyan">
-            <div class="card-icon" style="color:#88C0D0;">[ MODELO MATEMÁTICO ]</div>
-            <div class="card-header">1. MOTOR PREDICTIVO</div>
-            <div class="card-body">
-                <span style="color:#88C0D0;">>> STATUS: ACTIVO</span><br><br>
-                Procesamiento de estadística avanzada, cálculo de probabilidad real (True Odds) y modelado de escenarios.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.write("")
-        if st.button("INICIAR INFERENCIA", key="btn_pred"):
-            st.switch_page("pages/1_Motor_Predictivo.py")
-
+        st.markdown("""<div class="hud-card border-cyan"><div class="card-header" style="color:#88C0D0;">[1] MOTOR PREDICTIVO</div><div class="card-body">Modelado matemático, cálculo True Odds y ejecución protocolo Billy Walters. Extracción estructurada de API-Football.</div></div>""", unsafe_allow_html=True)
+        st.plotly_chart(create_gauge_chart(98, "CPU LOAD", "#88C0D0"), use_container_width=True, config={'displayModeBar': False})
+        if st.button("INICIAR INFERENCIA", key="btn_pred"): st.switch_page("pages/1_Motor_Predictivo.py")
     with c2:
-        st.markdown("""
-        <div class="hud-card border-purple">
-            <div class="card-icon" style="color:#E040FB;">[ ESCÁNER EV ]</div>
-            <div class="card-header">2. RADAR DE MERCADO</div>
-            <div class="card-body">
-                <span style="color:#E040FB;">>> STATUS: READY</span><br><br>
-                Detección de discrepancias en cuotas (Value Bets), seguimiento de movimientos de líneas y dinero institucional.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.write("")
-        if st.button("ABRIR RADAR DE VALOR", key="btn_radar"):
-            st.switch_page("pages/2_Radar_Mercado.py")
-
-    st.write("") 
-
-    c3, c4 = st.columns(2)
-
+        st.markdown("""<div class="hud-card border-purple"><div class="card-header" style="color:#E040FB;">[2] RADAR MERCADO</div><div class="card-body">Detección asimétrica de cuotas. Rastreo de Sharp Money y algoritmo RandomForest de sesgo poblacional.</div></div>""", unsafe_allow_html=True)
+        st.plotly_chart(create_gauge_chart(100, "ODDS API SYNC", "#E040FB"), use_container_width=True, config={'displayModeBar': False})
+        if st.button("ABRIR RADAR", key="btn_radar"): st.switch_page("pages/2_Radar_Mercado.py")
     with c3:
-        st.markdown("""
-        <div class="hud-card border-yellow">
-            <div class="card-icon" style="color:#EBCB8B;">[ TELEMETRÍA ]</div>
-            <div class="card-header">3. MONITOR TÁCTICO</div>
-            <div class="card-body">
-                <span style="color:#EBCB8B;">>> STATUS: MONITORING</span><br><br>
-                Ingesta de datos en tiempo real: alineaciones confirmadas, bajas críticas y variables meteorológicas operativas.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.write("")
-        if st.button("VER MONITOR TÁCTICO", key="btn_monitor"):
-            st.switch_page("pages/3_Monitor_Tactico.py")
-
+        st.markdown("""<div class="hud-card border-yellow"><div class="card-header" style="color:#EBCB8B;">[3] MONITOR TÁCTICO</div><div class="card-body">Ingesta en vivo de matriz de alineaciones, reportes de lesiones críticas e impacto de ecosistema.</div></div>""", unsafe_allow_html=True)
+        st.plotly_chart(create_gauge_chart(72, "DATA VOLATILITY", "#EBCB8B"), use_container_width=True, config={'displayModeBar': False})
+        if st.button("VER MONITOR", key="btn_monitor"): st.switch_page("pages/3_Monitor_Tactico.py")
     with c4:
-        st.markdown("""
-        <div class="hud-card border-red">
-            <div class="card-icon" style="color:#BF616A;">[ CONTROL DE RIESGO ]</div>
-            <div class="card-header">4. AUDITORÍA BANKROLL</div>
-            <div class="card-body">
-                <span style="color:#BF616A;">>> STATUS: SECURE</span><br><br>
-                Gestión de capital mediante Criterio de Kelly. Análisis de Yield, ROI acumulado y calibración del algoritmo.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.write("")
-        if st.button("ACCESO A AUDITORÍA", key="btn_audit"):
-            st.switch_page("pages/4_Auditoria_Bankroll.py")
+        st.markdown("""<div class="hud-card border-red"><div class="card-header" style="color:#BF616A;">[4] AUDITORÍA RIESGO</div><div class="card-body">Control fraccional de Criterio de Kelly. Trazabilidad de operaciones, análisis de Drawdown y tesorería.</div></div>""", unsafe_allow_html=True)
+        st.plotly_chart(create_gauge_chart(15, "RISK EXPOSURE", "#BF616A"), use_container_width=True, config={'displayModeBar': False})
+        if st.button("ACCESO AUDITORÍA", key="btn_audit"): st.switch_page("pages/4_Auditoria_Bankroll.py")
 
-    # --- LOGS DE TERMINAL ---
-    logs_html = "<div class='kernel-log'>"
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYS.LOGS / ACTIVITY FEED ]</p>", unsafe_allow_html=True)
+    
+    current_t = datetime.now().strftime('%H:%M:%S')
     logs = [
-        "[KERNEL] Predictive Engine v1.0 loaded in 14ms",
-        "[NET] Uplink established to API_FOOTBALL cluster",
-        "[NET] Uplink established to ODDS_API exchange",
-        "[SYS] Waiting for operator directive..."
+        f"[{current_t}] [INFO] Predictive Engine v10.1 loaded. Memory mapping optimized.",
+        f"[{current_t}] [NET] Uplink established to API_FOOTBALL cluster... Latency 24ms.",
+        f"[{current_t}] [NET] Synchronizing with The Odds API global exchange...",
+        f"[{current_t}] [SEC] Public Behavior Machine Learning model (RandomForest) initialized in background.",
+        f"[{current_t}] [WARN] Anomalous odds drop detected in market: soccer_epl. Logging to DB.",
+        f"[{current_t}] [SYS] Awaiting Operator Directive..."
     ]
+    
+    logs_html = "<div class='terminal-feed'>"
     for log in logs:
-        logs_html += f"<div>> {log}</div>"
+        if "[WARN]" in log: logs_html += f"<div style='color:#EBCB8B;'>> {log}</div>"
+        elif "[SEC]" in log: logs_html += f"<div style='color:#E040FB;'>> {log}</div>"
+        else: logs_html += f"<div>> {log}</div>"
     logs_html += "</div>"
 
     st.markdown(logs_html, unsafe_allow_html=True)
 
-    # RECARGA FORZADA
     if 'booted' not in st.session_state:
         st.session_state.booted = True
         time.sleep(0.5)
