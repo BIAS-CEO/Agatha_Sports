@@ -49,6 +49,10 @@ with c4:
 
 st.markdown("---")
 
+# Variable global para el terminal
+if 'terminal_logs' not in st.session_state:
+    st.session_state['terminal_logs'] = ""
+
 if 'fixtures' in st.session_state and not st.session_state['fixtures'].empty:
     df_f = st.session_state['fixtures']
     st.markdown("<div class='data-grid-header'>MATRIZ DE EVENTOS DISPONIBLES</div>", unsafe_allow_html=True)
@@ -71,11 +75,10 @@ if 'fixtures' in st.session_state and not st.session_state['fixtures'].empty:
         season = target_date.year if target_date.month >= 7 else target_date.year - 1
         terminal_placeholder = st.empty()
         
-        logs = ""
+        st.session_state['terminal_logs'] = ""
         def update_terminal(msg):
-            nonlocal logs
-            logs += f">>[{datetime.now().strftime('%H:%M:%S.%f')[:-3]}] {msg}<br>"
-            terminal_placeholder.markdown(f"<div class='terminal-box'>{logs}</div>", unsafe_allow_html=True)
+            st.session_state['terminal_logs'] += f">>[{datetime.now().strftime('%H:%M:%S.%f')[:-3]}] {msg}<br>"
+            terminal_placeholder.markdown(f"<div class='terminal-box'>{st.session_state['terminal_logs']}</div>", unsafe_allow_html=True)
             time.sleep(0.4)
 
         update_terminal("INICIALIZANDO MOTOR ESTOCÁSTICO...")
