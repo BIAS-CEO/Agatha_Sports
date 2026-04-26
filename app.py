@@ -50,7 +50,6 @@ def main():
     </div>
     """.format(datetime.now().strftime('%H:%M:%S ZULU')), unsafe_allow_html=True)
 
-    # --- NUEVO: MACRO-MÉTRICAS B2B SAAS ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ ECONOMÍA SAAS / B2B TELEMETRY ]</p>", unsafe_allow_html=True)
     s1, s2, s3, s4 = st.columns(4)
     with s1: st.markdown("""<div class="kpi-container"><div class="kpi-value kpi-saas">12,450 €</div><div class="kpi-label">MRR (RECURRENTE MENSUAL)</div></div>""", unsafe_allow_html=True)
@@ -59,7 +58,6 @@ def main():
     with s4: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#A3BE8C;">1.2%</div><div class="kpi-label">CHURN RATE (BAJAS)</div></div>""", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- COMMAND GRID ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ ADMINISTRACIÓN DE INFRAESTRUCTURA (C2) ]</p>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -80,9 +78,8 @@ def main():
         if st.button("ACCESO AUDITORÍA", key="btn_audit"): st.switch_page("pages/4_Auditoria_Bankroll.py")
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- FRONTEND CLIENT VIEW ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ CAPA 5 / INTERFAZ DE SUSCRIPTOR (B2C) ]</p>", unsafe_allow_html=True)
-    st.markdown("""<div class="b2c-box"><h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3><p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Incluye simulador estocástico de Poisson para visualización de "Caja Negra".</p></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="b2c-box"><h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3><p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Incluye simulador matemático interactivo para próximos encuentros.</p></div>""", unsafe_allow_html=True)
     col_btn, _ = st.columns([0.25, 0.75])
     with col_btn:
         st.markdown("""<style>div.stButton > button[kind="secondary"] { border-color: #58a6ff !important; color: #58a6ff !important; } div.stButton > button[kind="secondary"]:hover { background-color: rgba(88, 166, 255, 0.1) !important; box-shadow: 0 0 10px #58a6ff; }</style>""", unsafe_allow_html=True)
@@ -91,13 +88,8 @@ def main():
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYS.LOGS / ACTIVITY FEED ]</p>", unsafe_allow_html=True)
     current_t = datetime.now().strftime('%H:%M:%S')
-    logs_html = f"<div class='terminal-feed'><div>>[{current_t}] [INFO] Predictive Engine v10.1 loaded.</div><div style='color:#58a6ff;'>> [{current_t}] [SaaS] Stripe API sync completed. MRR updated.</div><div style='color:#EBCB8B;'>> [{current_t}] [WARN] Anomalous odds drop detected.</div><div>> [{current_t}][SYS] Awaiting Operator Directive...</div></div>"
+    logs_html = f"<div class='terminal-feed'><div>>[{current_t}] [INFO] Predictive Engine v10.1 loaded.</div><div style='color:#58a6ff;'>> [{current_t}] [SaaS] Stripe API sync completed. MRR updated.</div><div style='color:#EBCB8B;'>>[{current_t}] [WARN] Anomalous odds drop detected.</div><div>> [{current_t}][SYS] Awaiting Operator Directive...</div></div>"
     st.markdown(logs_html, unsafe_allow_html=True)
-
-    if 'booted' not in st.session_state:
-        st.session_state.booted = True
-        time.sleep(0.5)
-        st.rerun()
 
 if __name__ == "__main__":
     main()
