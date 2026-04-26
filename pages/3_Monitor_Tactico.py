@@ -34,7 +34,6 @@ else:
         with st.spinner("Enlazando..."):
             lineups = fetch_tactics(row['fixture_id'], "fixtures/lineups")
             injuries = fetch_tactics(row['fixture_id'], "injuries")
-            
             cl, ca = st.columns(2)
             for t in lineups:
                 tgt = cl if t['team']['name'] == row['home_team'] else ca
