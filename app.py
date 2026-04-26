@@ -29,6 +29,7 @@ st.markdown("""
     .border-purple { border-top: 3px solid #E040FB; }
     .border-yellow { border-top: 3px solid #EBCB8B; }
     .border-red { border-top: 3px solid #BF616A; }
+    .b2c-box { background-color: #0D1117; border: 1px solid #30363D; border-left: 4px solid #58a6ff; padding: 20px; margin-bottom: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -38,7 +39,7 @@ def create_gauge_chart(value, title, color):
         value = value,
         title = {'text': title, 'font': {'color': '#8B949E', 'size': 12}},
         number = {'font': {'color': '#ECEFF4', 'size': 20}},
-        gauge = {'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "#30363D"}, 'bar': {'color': color}, 'bgcolor': "rgba(0,0,0,0)", 'borderwidth': 1, 'bordercolor': "#30363D"}
+        gauge = {'axis': {'range':[None, 100], 'tickwidth': 1, 'tickcolor': "#30363D"}, 'bar': {'color': color}, 'bgcolor': "rgba(0,0,0,0)", 'borderwidth': 1, 'bordercolor': "#30363D"}
     ))
     fig.update_layout(height=150, margin=dict(l=10, r=10, t=30, b=10), paper_bgcolor="rgba(0,0,0,0)", font={'family': "Share Tech Mono"})
     return fig
@@ -58,6 +59,7 @@ def main():
     </div>
     """.format(datetime.now().strftime('%H:%M:%S ZULU')), unsafe_allow_html=True)
 
+    # --- GLOBAL MACRO-METRICS (KPI ROW) ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYSTEM TELEMETRY / GLOBAL OVERVIEW ]</p>", unsafe_allow_html=True)
     
     k1, k2, k3, k4 = st.columns(4)
@@ -68,6 +70,8 @@ def main():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # --- BACKEND COMMAND GRID (CAPAS 1 A 4) ---
+    st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ ADMINISTRACIÓN DE INFRAESTRUCTURA (C2) ]</p>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown("""<div class="hud-card border-cyan"><div class="card-header" style="color:#88C0D0;">[1] MOTOR PREDICTIVO</div><div class="card-body">Modelado matemático, cálculo True Odds y ejecución protocolo Billy Walters. Extracción estructurada de API-Football.</div></div>""", unsafe_allow_html=True)
@@ -87,6 +91,26 @@ def main():
         if st.button("ACCESO AUDITORÍA", key="btn_audit"): st.switch_page("pages/4_Auditoria_Bankroll.py")
 
     st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- FRONTEND CLIENT VIEW (CAPA 5) ---
+    st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ CAPA 5 / INTERFAZ DE SUSCRIPTOR (B2C) ]</p>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="b2c-box">
+        <h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3>
+        <p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Entorno corporativo de entrega. Filtro conservador activado (>3% Edge). Oculta la telemetría cruda del sistema al usuario.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_btn, _ = st.columns([0.25, 0.75])
+    with col_btn:
+        # Se sobreescribe localmente el borde del botón para encajar con el color azul (B2C)
+        st.markdown("""<style>div.stButton > button[kind="secondary"] { border-color: #58a6ff !important; color: #58a6ff !important; } div.stButton > button[kind="secondary"]:hover { background-color: rgba(88, 166, 255, 0.1) !important; box-shadow: 0 0 10px #58a6ff; }</style>""", unsafe_allow_html=True)
+        if st.button("ABRIR VISTA DE SUSCRIPTOR (B2C)", key="btn_b2c"):
+            st.switch_page("pages/5_Portal_Suscriptor.py")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- LIVE TERMINAL FEED ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYS.LOGS / ACTIVITY FEED ]</p>", unsafe_allow_html=True)
     
     current_t = datetime.now().strftime('%H:%M:%S')
@@ -95,7 +119,7 @@ def main():
         f"[{current_t}] [NET] Uplink established to API_FOOTBALL cluster... Latency 24ms.",
         f"[{current_t}] [NET] Synchronizing with The Odds API global exchange...",
         f"[{current_t}] [SEC] Public Behavior Machine Learning model (RandomForest) initialized in background.",
-        f"[{current_t}] [WARN] Anomalous odds drop detected in market: soccer_epl. Logging to DB.",
+        f"[{current_t}][WARN] Anomalous odds drop detected in market: soccer_epl. Logging to DB.",
         f"[{current_t}] [SYS] Awaiting Operator Directive..."
     ]
     
