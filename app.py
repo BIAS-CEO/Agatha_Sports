@@ -4,9 +4,6 @@ from datetime import datetime
 import plotly.graph_objects as go
 import sports_core as sc
 
-# ==============================================================================
-# CONFIGURACIÓN BASE DEL SISTEMA
-# ==============================================================================
 st.set_page_config(page_title="AGATHA OS | Command Center", layout="wide", initial_sidebar_state="collapsed")
 sc.set_agatha_theme()
 
@@ -18,6 +15,7 @@ st.markdown("""
     .kpi-container { background: #0D1117; border: 1px solid #30363D; padding: 15px; text-align: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
     .kpi-value { font-family: 'Rajdhani', sans-serif; font-size: 2.5rem; font-weight: bold; color: #ECEFF4; }
     .kpi-label { font-size: 0.8rem; color: #8B949E; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-saas { color: #58a6ff; }
     .hud-card { background: linear-gradient(135deg, rgba(22, 27, 34, 0.95) 0%, rgba(13, 17, 23, 0.98) 100%); border: 1px solid #30363D; padding: 20px; height: 100%; min-height: 240px; transition: all 0.3s ease; }
     .hud-card:hover { transform: translateY(-2px); background: rgba(30, 35, 45, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
     .card-header { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
@@ -34,13 +32,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def create_gauge_chart(value, title, color):
-    fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = value,
-        title = {'text': title, 'font': {'color': '#8B949E', 'size': 12}},
-        number = {'font': {'color': '#ECEFF4', 'size': 20}},
-        gauge = {'axis': {'range':[None, 100], 'tickwidth': 1, 'tickcolor': "#30363D"}, 'bar': {'color': color}, 'bgcolor': "rgba(0,0,0,0)", 'borderwidth': 1, 'bordercolor': "#30363D"}
-    ))
+    fig = go.Figure(go.Indicator(mode="gauge+number", value=value, title={'text': title, 'font': {'color': '#8B949E', 'size': 12}}, number={'font': {'color': '#ECEFF4', 'size': 20}}, gauge={'axis': {'range':[None, 100], 'tickwidth': 1, 'tickcolor': "#30363D"}, 'bar': {'color': color}, 'bgcolor': "rgba(0,0,0,0)", 'borderwidth': 1, 'bordercolor': "#30363D"}))
     fig.update_layout(height=150, margin=dict(l=10, r=10, t=30, b=10), paper_bgcolor="rgba(0,0,0,0)", font={'family': "Share Tech Mono"})
     return fig
 
@@ -54,82 +46,52 @@ def main():
         <div style="text-align:right; font-size: 0.9rem; color:#5E81AC;">
             <div>SYS_TIME: <span style="color:#ECEFF4;">{}</span></div>
             <div>STATUS: <span class="live-indicator">[REC] SECURE UPLINK</span></div>
-            <div style="color:#A3BE8C;">DEFCON 5 / NORMAL OP</div>
         </div>
     </div>
     """.format(datetime.now().strftime('%H:%M:%S ZULU')), unsafe_allow_html=True)
 
-    # --- GLOBAL MACRO-METRICS (KPI ROW) ---
-    st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYSTEM TELEMETRY / GLOBAL OVERVIEW ]</p>", unsafe_allow_html=True)
-    
-    k1, k2, k3, k4 = st.columns(4)
-    with k1: st.markdown("""<div class="kpi-container"><div class="kpi-value">2,104</div><div class="kpi-label">NODOS ANALIZADOS (24H)</div></div>""", unsafe_allow_html=True)
-    with k2: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#EBCB8B;">14</div><div class="kpi-label">VALUE BETS DETECTADAS</div></div>""", unsafe_allow_html=True)
-    with k3: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#A3BE8C;">+4.2%</div><div class="kpi-label">YIELD ACUMULADO (30D)</div></div>""", unsafe_allow_html=True)
-    with k4: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#E040FB;">89.4%</div><div class="kpi-label">CALIBRACIÓN SISTEMA</div></div>""", unsafe_allow_html=True)
-
+    # --- NUEVO: MACRO-MÉTRICAS B2B SAAS ---
+    st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ ECONOMÍA SAAS / B2B TELEMETRY ]</p>", unsafe_allow_html=True)
+    s1, s2, s3, s4 = st.columns(4)
+    with s1: st.markdown("""<div class="kpi-container"><div class="kpi-value kpi-saas">12,450 €</div><div class="kpi-label">MRR (RECURRENTE MENSUAL)</div></div>""", unsafe_allow_html=True)
+    with s2: st.markdown("""<div class="kpi-container"><div class="kpi-value kpi-saas">450 €</div><div class="kpi-label">LTV (LIFE TIME VALUE)</div></div>""", unsafe_allow_html=True)
+    with s3: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#A3BE8C;">45 €</div><div class="kpi-label">CAC (COSTE ADQUISICIÓN)</div></div>""", unsafe_allow_html=True)
+    with s4: st.markdown("""<div class="kpi-container"><div class="kpi-value" style="color:#A3BE8C;">1.2%</div><div class="kpi-label">CHURN RATE (BAJAS)</div></div>""", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- BACKEND COMMAND GRID (CAPAS 1 A 4) ---
+    # --- COMMAND GRID ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ ADMINISTRACIÓN DE INFRAESTRUCTURA (C2) ]</p>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown("""<div class="hud-card border-cyan"><div class="card-header" style="color:#88C0D0;">[1] MOTOR PREDICTIVO</div><div class="card-body">Modelado matemático, cálculo True Odds y ejecución protocolo Billy Walters. Extracción estructurada de API-Football.</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="hud-card border-cyan"><div class="card-header" style="color:#88C0D0;">[1] MOTOR PREDICTIVO</div><div class="card-body">Modelado matemático, cálculo True Odds y ejecución de alertas Push.</div></div>""", unsafe_allow_html=True)
         st.plotly_chart(create_gauge_chart(98, "CPU LOAD", "#88C0D0"), use_container_width=True, config={'displayModeBar': False})
         if st.button("INICIAR INFERENCIA", key="btn_pred"): st.switch_page("pages/1_Motor_Predictivo.py")
     with c2:
-        st.markdown("""<div class="hud-card border-purple"><div class="card-header" style="color:#E040FB;">[2] RADAR MERCADO</div><div class="card-body">Detección asimétrica de cuotas. Rastreo de Sharp Money y algoritmo RandomForest de sesgo poblacional.</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="hud-card border-purple"><div class="card-header" style="color:#E040FB;">[2] RADAR MERCADO</div><div class="card-body">Detección de Sharp Money y algoritmo RandomForest de sesgo poblacional.</div></div>""", unsafe_allow_html=True)
         st.plotly_chart(create_gauge_chart(100, "ODDS API SYNC", "#E040FB"), use_container_width=True, config={'displayModeBar': False})
         if st.button("ABRIR RADAR", key="btn_radar"): st.switch_page("pages/2_Radar_Mercado.py")
     with c3:
-        st.markdown("""<div class="hud-card border-yellow"><div class="card-header" style="color:#EBCB8B;">[3] MONITOR TÁCTICO</div><div class="card-body">Ingesta en vivo de matriz de alineaciones, reportes de lesiones críticas e impacto de ecosistema.</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="hud-card border-yellow"><div class="card-header" style="color:#EBCB8B;">[3] MONITOR TÁCTICO</div><div class="card-body">Ingesta de matriz de alineaciones, reportes de lesiones críticas.</div></div>""", unsafe_allow_html=True)
         st.plotly_chart(create_gauge_chart(72, "DATA VOLATILITY", "#EBCB8B"), use_container_width=True, config={'displayModeBar': False})
         if st.button("VER MONITOR", key="btn_monitor"): st.switch_page("pages/3_Monitor_Tactico.py")
     with c4:
-        st.markdown("""<div class="hud-card border-red"><div class="card-header" style="color:#BF616A;">[4] AUDITORÍA RIESGO</div><div class="card-body">Control fraccional de Criterio de Kelly. Trazabilidad de operaciones, análisis de Drawdown y tesorería.</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="hud-card border-red"><div class="card-header" style="color:#BF616A;">[4] AUDITORÍA & BACKTEST</div><div class="card-body">Simulador Forense de Montecarlo, Criterio Kelly y PnL histórico.</div></div>""", unsafe_allow_html=True)
         st.plotly_chart(create_gauge_chart(15, "RISK EXPOSURE", "#BF616A"), use_container_width=True, config={'displayModeBar': False})
         if st.button("ACCESO AUDITORÍA", key="btn_audit"): st.switch_page("pages/4_Auditoria_Bankroll.py")
-
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- FRONTEND CLIENT VIEW (CAPA 5) ---
+    # --- FRONTEND CLIENT VIEW ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ CAPA 5 / INTERFAZ DE SUSCRIPTOR (B2C) ]</p>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class="b2c-box">
-        <h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3>
-        <p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Entorno corporativo de entrega. Filtro conservador activado (>3% Edge). Oculta la telemetría cruda del sistema al usuario.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    st.markdown("""<div class="b2c-box"><h3 style="color: #58a6ff; margin-top: 0; font-family: 'Rajdhani', sans-serif;">PORTAL DE ENTREGABLES (CLIENTE FINAL)</h3><p style="color: #8B949E; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;">Incluye simulador estocástico de Poisson para visualización de "Caja Negra".</p></div>""", unsafe_allow_html=True)
     col_btn, _ = st.columns([0.25, 0.75])
     with col_btn:
-        # Se sobreescribe localmente el borde del botón para encajar con el color azul (B2C)
         st.markdown("""<style>div.stButton > button[kind="secondary"] { border-color: #58a6ff !important; color: #58a6ff !important; } div.stButton > button[kind="secondary"]:hover { background-color: rgba(88, 166, 255, 0.1) !important; box-shadow: 0 0 10px #58a6ff; }</style>""", unsafe_allow_html=True)
-        if st.button("ABRIR VISTA DE SUSCRIPTOR (B2C)", key="btn_b2c"):
-            st.switch_page("pages/5_Portal_Suscriptor.py")
+        if st.button("ABRIR VISTA DE SUSCRIPTOR (B2C)", key="btn_b2c"): st.switch_page("pages/5_Portal_Suscriptor.py")
 
     st.markdown("<br>", unsafe_allow_html=True)
-
-    # --- LIVE TERMINAL FEED ---
     st.markdown("<p style='color:#8B949E; font-weight:bold; margin-bottom: 5px;'>[ SYS.LOGS / ACTIVITY FEED ]</p>", unsafe_allow_html=True)
-    
     current_t = datetime.now().strftime('%H:%M:%S')
-    logs = [
-        f"[{current_t}] [INFO] Predictive Engine v10.1 loaded. Memory mapping optimized.",
-        f"[{current_t}] [NET] Uplink established to API_FOOTBALL cluster... Latency 24ms.",
-        f"[{current_t}] [NET] Synchronizing with The Odds API global exchange...",
-        f"[{current_t}] [SEC] Public Behavior Machine Learning model (RandomForest) initialized in background.",
-        f"[{current_t}][WARN] Anomalous odds drop detected in market: soccer_epl. Logging to DB.",
-        f"[{current_t}] [SYS] Awaiting Operator Directive..."
-    ]
-    
-    logs_html = "<div class='terminal-feed'>"
-    for log in logs:
-        if "[WARN]" in log: logs_html += f"<div style='color:#EBCB8B;'>> {log}</div>"
-        elif "[SEC]" in log: logs_html += f"<div style='color:#E040FB;'>> {log}</div>"
-        else: logs_html += f"<div>> {log}</div>"
-    logs_html += "</div>"
-
+    logs_html = f"<div class='terminal-feed'><div>>[{current_t}] [INFO] Predictive Engine v10.1 loaded.</div><div style='color:#58a6ff;'>> [{current_t}] [SaaS] Stripe API sync completed. MRR updated.</div><div style='color:#EBCB8B;'>> [{current_t}] [WARN] Anomalous odds drop detected.</div><div>> [{current_t}][SYS] Awaiting Operator Directive...</div></div>"
     st.markdown(logs_html, unsafe_allow_html=True)
 
     if 'booted' not in st.session_state:
