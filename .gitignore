@@ -1,0 +1,16 @@
+# Archivos de entorno y secretos
+venv/
+env/
+.env
+.streamlit/secrets.toml
+
+# Caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
